@@ -250,7 +250,7 @@
       .price strong{font-size:1.35rem;font-weight:900;letter-spacing:-.02em}
       .price .from{font-size:.85rem;color:var(--ink-3);font-weight:600}
       .plans{display:grid;gap:8px}
-      .planrow{display:flex;align-items:center;gap:10px;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+      .planrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
       .planrow .pl{flex:1;min-width:0}
       .planrow .pl strong{display:block;font-size:.93rem;line-height:1.25}
       .planrow .pl span{display:block;font-family:var(--mono);font-size:.68rem;color:var(--ink-3);margin-top:2px}
@@ -258,13 +258,22 @@
       .planrow .add-btn{padding:10px 13px;min-height:44px;font-size:.86rem;border-radius:9px}
       .planrow.featured{border-color:var(--accent);background:color-mix(in srgb, var(--accent) 12%, var(--surface-2))}
       .planrow .feat{display:inline-block;font-family:var(--mono);font-size:.64rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-ink);background:var(--accent-strong);border-radius:5px;padding:2px 6px;margin-left:6px;vertical-align:2px}
-      @media (max-width:560px){.planrow{flex-wrap:wrap}.planrow .pl{flex:1 1 52%}.planrow .add-btn{flex:1 1 100%}}
+      @media (max-width:560px){.planrow .pl{flex:1 1 52%}.planrow .add-btn{flex:1 1 100%}.planrow .mp-btn{flex:1 1 100%}}
       .add-btn{
         background:var(--accent-strong);color:var(--accent-ink);border:none;border-radius:10px;
         padding:12px 18px;font-weight:800;font-size:.95rem;white-space:nowrap;min-height:48px;
       }
       .add-btn:hover{filter:brightness(1.07)}
       .add-btn.added{background:var(--surface-2);color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+      .buy-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+      .mp-btn{
+        display:inline-flex;align-items:center;justify-content:center;background:#009ee3;color:#fff;
+        border-radius:10px;padding:12px 16px;font-weight:800;font-size:.92rem;white-space:nowrap;min-height:48px;
+      }
+      .mp-btn:hover{filter:brightness(1.08)}
+      .planrow .mp-btn{padding:10px 12px;min-height:44px;font-size:.84rem;border-radius:9px}
+      .mp-cart-link{display:inline-block;margin-top:8px;color:#009ee3;font-size:.8rem;font-weight:700;text-decoration:underline}
+      .mp-note{margin:0;font-size:.8rem;color:var(--ink-2);text-align:center}
       .mini-add{
         flex:none;width:30px;height:30px;border-radius:8px;border:none;padding:0;
         background:var(--accent-strong);color:var(--accent-ink);display:grid;place-items:center;
@@ -484,6 +493,8 @@
         .cart-btn{padding:9px 11px}
         .sheet .pricerow{flex-direction:column;align-items:stretch;gap:12px}
         .sheet .add-btn{width:100%;display:flex;align-items:center;justify-content:center;min-height:52px;font-size:1rem}
+        .sheet .buy-actions{flex-direction:column}
+        .sheet .mp-btn{width:100%;min-height:52px;font-size:1rem}
         .hero h1{font-size:1.55rem}
         .bigsearch input{padding:15px 20px 15px 50px;font-size:1rem}
         .section{padding:34px 0}
@@ -777,6 +788,7 @@
         </div>
         <button class="pix-btn" id="genPix" type="button" disabled>Gerar QR Code PIX</button>
         <button class="checkout-btn" id="genOrder" type="button" disabled>Gerar mensagem do pedido</button>
+        <p class="mp-note">Pagamento pelo Mercado Pago é por item: pague cada item no seu link e envie o comprovante no atendimento.</p>
         <p class="drawer-note">Preço e estoque confirmados com o fornecedor no atendimento, antes do pagamento — o pedido só é cobrado após a confirmação. Envie a mensagem gerada no atendimento da loja pra confirmar e receber seus produtos. Nada é cobrado nesta página.</p>
       </div>
     </aside>
@@ -1522,6 +1534,63 @@
         }
       ];
 
+      // Links de pagamento do Mercado Pago — um por item comprável (gerados na conta do dono).
+      var MP_LINKS = {
+        "gow-ragnarok": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=513787510-513361de-e615-4e7f-87b3-497fca9ac79d",
+        "gow-2018": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=513787510-20e59763-826d-45a8-bcfe-26586f5f9f14",
+        "pragmata": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=513787510-7eaca446-db1d-4955-8681-678726eb655b",
+        "conta-10k": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=513787510-0f33d9e7-1ad7-4bdf-bdfa-9b4d372f6fb8",
+        "conta-aaa": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=513787510-edc8fe1e-8a5b-4ef3-9574-2ab335d634ed",
+        "offline-historia": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=513787510-8501c8f2-3da7-4fa6-bad7-712cafb70c22",
+        "steam-2990": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=513787510-ccfe445c-3d7a-4a38-82d9-e80ccc9e1ec9",
+        "key-aleatoria": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=513787510-ad9175b0-1fdc-4322-a9c3-6a5ca0f30b71",
+        "chatgpt-plus": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=513787510-2386381e-b4c1-4fdd-8fd6-7bd8898fb8b7",
+        "chatgpt-go": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=513787510-40b37764-1fcc-4bd0-833d-2c18dd03df57",
+        "claude-code-pro": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=513787510-2bdd4852-edeb-4161-8513-f3e13f738e12",
+        "muse-ai-1b": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=513787510-425796e5-a917-4414-9504-a16eb9687429",
+        "muse-ai-2b": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=513787510-629ad5ca-f0f3-4a4a-8c9c-41c573a082cc",
+        "muse-ai-3b": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=513787510-cc0a8bba-a98b-434e-ae6a-50f172013f4d",
+        "gemini-3m": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=513787510-f2877aee-8b9a-4ef7-aefb-c3fc185faaed",
+        "gemini-12m": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=513787510-a3d7a370-34e1-4e64-8370-b08fffba3617",
+        "canva-pro": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=513787510-50d0b25a-ed49-44f8-8a7e-0f29ed5abd40",
+        "lovable-pro": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=513787510-ade4f840-2f54-4a55-a36d-7d81f0538b97",
+        "netflix-4k": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=513787510-0685fcd8-e6ac-4aad-ab29-c4ac2822aefa",
+        "netflix-pin": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=513787510-91a550a3-f4f1-4a41-baa7-818d0042999d",
+        "spotify-premium": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=513787510-ecca98d5-9f98-4b20-93ce-afd213c547f6",
+        "youtube-premium": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=513787510-a10844c8-8351-4fdc-8960-62dc9b59e822",
+        "prime-video-6m": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=513787510-f4d52028-9a1e-4080-9aa6-1a03a65a9ae3",
+        "max-disney": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=513787510-a3c995fc-9cd4-414f-b00b-63826e75ccfd",
+        "gamepass-ultimate": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=513787510-a12628dd-0c86-4aa8-ba55-16b5cf87be34",
+        "win11-ativado": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=513787510-f26a7777-33b4-4dd7-adf9-85f53fca684e",
+        "office365-vitalicio": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=513787510-cd963fcf-d987-4cb4-8a16-ae80b3983573",
+        "office365-2025": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=513787510-33315595-259d-4078-b57f-c28de7e2814c",
+        "nordvpn-3m": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=513787510-c63f9737-dc5c-4875-a979-ea8a73ce6f22",
+        "canva-pro-1ano": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=513787510-e21eb799-ee3b-461b-b0a0-e771d8af1189",
+        "capcut-pro-30d": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=513787510-cba1424d-b11a-4de9-a15a-62cfc3979b27",
+        "capcut-canva-combo": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=513787510-ca8101d6-a357-44e3-ad9e-95147cc03011",
+        "notion-business-3m": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=513787510-b54f427c-142c-4522-9296-f8b0ad9da091",
+        "figma-edu-1ano": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=513787510-976bade4-5108-4164-8e41-f37e9a28565f",
+        "adobe-express-12m": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=513787510-f6938b1e-d8a5-4806-92d6-b80ce71e408a",
+        "pack-ferramentas": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=513787510-3b4e7c7f-6984-4978-87fe-3c4a7f083f9d",
+        "grammarly-pro-1ano": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=513787510-94e0f863-a839-4062-84cd-f270c39cde42",
+        "adobe-pack-ativado": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=513787510-cee6f1c9-0453-4b63-abd6-0d64562a19d5",
+        "gift-steam-30": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=513787510-a8064c4e-860b-454a-b92d-f702ffceb8b7",
+        "gift-steam-50": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=513787510-5c057f39-3caf-4902-a384-be93e3180e2f",
+        "gift-steam-100": "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=513787510-8c3d3ae0-016a-41db-9bab-0a084abee11c"
+      };
+
+      function mpBtnHTML(id){
+        var url = MP_LINKS[id];
+        if (!url) return "";
+        return '<a class="mp-btn" href="' + url + '" target="_blank" rel="noopener">Pagar com Mercado Pago</a>';
+      }
+
+      function mpCartLinkHTML(id){
+        var url = MP_LINKS[id];
+        if (!url) return "";
+        return '<br /><a class="mp-cart-link" href="' + url + '" target="_blank" rel="noopener">Pagar com Mercado Pago</a>';
+      }
+
       var grid = document.getElementById("grid");
       var emptyState = document.getElementById("emptyState");
       var resultCount = document.getElementById("resultCount");
@@ -1581,7 +1650,7 @@
           var featured = pid === "muse-ai-3b";
           return '<div class="planrow' + (featured ? " featured" : "") + '"><div class="pl"><strong>' + label + (featured ? '<span class="feat">Destaque · ovnicompany</span>' : "") + "</strong>" +
             (e.note ? "<span>" + e.note + "</span>" : "") + "</div>" +
-            '<div class="pp">' + fmt(e.price) + "</div>" + addBtnHTML(pid, false) + "</div>";
+            '<div class="pp">' + fmt(e.price) + "</div>" + addBtnHTML(pid, false) + mpBtnHTML(pid) + "</div>";
         }).join("");
         return '<div class="plans">' + rows + "</div>";
       }
@@ -1649,7 +1718,7 @@
           (p.warning ? '<div class="warnline"><strong>⚠ Leia:</strong> ' + p.warning + "</div>" : "") +
           (p.seller ? '<div class="sellerline"><b>✓</b><span>' + p.seller + '</span>' + (p.margin ? '<span class="margin">' + p.margin + "</span>" : "") + "</div>" : "") +
           '<div class="tagrow">' + p.tags.map(function(t){ return '<span class="tag">' + t + "</span>"; }).join("") + "</div>" +
-          (p.plans ? plansHTML(p) : '<div class="pricerow">' + priceHTML(p) + addBtnHTML(p.id, p.consult) + "</div>") +
+          (p.plans ? plansHTML(p) : '<div class="pricerow">' + priceHTML(p) + '<div class="buy-actions">' + addBtnHTML(p.id, p.consult) + mpBtnHTML(p.id) + "</div></div>") +
           askBoxHTML(p) +
           "</div>";
       }
@@ -1798,7 +1867,7 @@
           return '<div class="citem">' + (p.img ? '<img class="thumb" src="' + p.img + '" alt="" loading="lazy" />' : "") + '<div class="info"><h4>' + p.name + "</h4>" +
             '<div class="unit">' + unit + "</div>" +
             '<div class="qty"><button type="button" data-dec="' + id + '" aria-label="Diminuir quantidade">−</button><b>' + cart[id] + '</b><button type="button" data-inc="' + id + '" aria-label="Aumentar quantidade">+</button></div>' +
-            '<button class="remove" type="button" data-remove="' + id + '">Remover</button></div>' +
+            '<button class="remove" type="button" data-remove="' + id + '">Remover</button>' + mpCartLinkHTML(id) + "</div>" +
             '<div class="line-total">' + line + "</div></div>";
         }).join("") + questionsHTML();
         var inc = box.querySelectorAll("[data-inc]");
